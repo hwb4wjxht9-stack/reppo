@@ -1,0 +1,38 @@
+{
+  "name": "robinhood-crypto-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP server for the official Robinhood Crypto Trading API",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": {
+    "robinhood-crypto-mcp-server": "dist/index.js",
+    "robinhood-crypto-keygen": "dist/generate-keys.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts",
+    "keygen": "tsx src/generate-keys.ts",
+    "typecheck": "tsc --noEmit",
+    "clean": "rm -rf dist"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "axios": "^1.13.1",
+    "express": "^5.1.0",
+    "tweetnacl": "^1.0.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.5",
+    "@types/node": "^22.19.1",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

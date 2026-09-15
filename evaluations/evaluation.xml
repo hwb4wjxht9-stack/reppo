@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Evaluation questions for robinhood-crypto-mcp-server.
+
+  These questions are answerable with the server connected and DUMMY credentials
+  (any non-empty ROBINHOOD_API_KEY / ROBINHOOD_PRIVATE_KEY): every question is
+  answered from tool metadata or from preview-mode order construction, which
+  never contacts Robinhood and never places an order. That keeps the suite
+  read-only, non-destructive, and stable over time.
+
+  Answers below were verified against this implementation via an MCP stdio
+  handshake and tool calls. Questions about live account or market data are
+  deliberately excluded — their answers would not be stable, and they could not
+  be verified in the build environment (no credentials, no network access to
+  Robinhood).
+-->
+<evaluation>
+  <qa_pair>
+    <question>Using the Robinhood crypto MCP server, preview (do not place) a buy of 0.001 BTC-USD as a limit order with a limit price of 50000.00. In the request body the server would send, what is the exact JSON key whose object contains asset_quantity and limit_price?</question>
+    <answer>limit_order_config</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Preview a market buy of 25.00 US dollars worth of BTC-USD on the Robinhood crypto MCP server, sizing the order in dollars rather than in crypto. In the generated request body, what is the name of the field that carries the value 25.00?</question>
+    <answer>quote_amount</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Call the Robinhood crypto order-placement tool with a valid market order but without setting its confirmation argument. In the structured output, what boolean value is returned for the "placed" field?</question>
+    <answer>false</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Ask the Robinhood crypto MCP server to place a market order for BTC-USD while also supplying a limit price. The request is rejected before any network call. Which single argument name does the validation error identify as not valid for that order type?</question>
+    <answer>limit_price</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Try to place a stop_loss order for ETH-USD with an asset quantity but no trigger price on the Robinhood crypto MCP server. Which argument name does the error say is required for that order type?</question>
+    <answer>stop_price</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Preview a limit sell of 0.01 BTC-USD at 70000.00 on the Robinhood crypto MCP server without specifying how long the order should stay live. What time_in_force value appears in the generated order config?</question>
+    <answer>gtc</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Among the tools exposed by the Robinhood crypto MCP server, which one reports the account's crypto buying power? Give the exact tool name.</question>
+    <answer>robinhood_get_crypto_account</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>List the tools exposed by the Robinhood crypto MCP server. How many tools are registered in total?</question>
+    <answer>9</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>Inspect the annotations of every tool on the Robinhood crypto MCP server. Which tool is annotated as both destructive and idempotent? Give the exact tool name.</question>
+    <answer>robinhood_cancel_crypto_order</answer>
+  </qa_pair>
+  <qa_pair>
+    <question>You listed crypto orders on the Robinhood crypto MCP server and the response reported that more results exist. What is the name of the argument you pass on the next call to continue from where that page ended?</question>
+    <answer>cursor</answer>
+  </qa_pair>
+</evaluation>
