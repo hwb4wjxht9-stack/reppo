@@ -24,7 +24,8 @@ export function supabaseUrl(): string {
   if (dash) return `https://${dash[1]}.supabase.co`;
   let url = raw.replace(/\s+/g, "");
   // Missing or mistyped "https://" (e.g. "abcd.supabase.co", "htps:/abcd…").
-  if (url && !/^https?:\/\//i.test(url)) url = "https://" + url.replace(/^[a-z]+:\/*/i, "");
+  if (url && !/^https?:\/\//i.test(url))
+    url = (/^(localhost|127\.)/i.test(url) ? "http://" : "https://") + url.replace(/^[a-z]+:\/*/i, "");
   try {
     return new URL(url).origin;
   } catch {
@@ -44,7 +45,8 @@ export function supabaseConfigured(): boolean {
 export function supabaseSetupProblem(): string | null {
   const url = supabaseUrl();
   if (url.includes("your-project")) return "SUPABASE_URL still has the example value “your-project”.";
-  if (!/^https:\/\/[a-z0-9-]+\.supabase\.(co|in)$/i.test(url))
+  const local = /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(url); // `supabase start` on this computer
+  if (!local && !/^https:\/\/[a-z0-9-]+\.supabase\.(co|in)$/i.test(url))
     return `SUPABASE_URL should look like https://abcdxyz.supabase.co, but it is “${url}”.`;
   const key = serviceKey();
   if (key.length < 40) return "SUPABASE_SERVICE_ROLE_KEY looks too short. Copy the whole key.";

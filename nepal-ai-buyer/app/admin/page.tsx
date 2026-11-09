@@ -1,23 +1,12 @@
 import { adminPasswordSet, isAdmin } from "@/lib/server/admin-auth";
 import { db, explainDbError, supabaseConfigured, supabaseSetupProblem } from "@/lib/server/supabase";
+import { mapsLink } from "@/lib/location";
 import { formatNepalPhone } from "@/lib/phone";
-import { deleteShopAction, logoutAction, toggleShopAction } from "./actions";
-import { AddShopForm, BulkAddForm, LoginForm } from "./forms";
+import { logoutAction, toggleShopAction } from "./actions";
+import { BulkAddForm, DeleteButton, LoginForm, ShopForm, type Shop } from "./forms";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Shops admin — Nepal AI Buyer" };
-
-type ShopRow = {
-  id: string;
-  name: string;
-  phone: string;
-  area: string;
-  category: string;
-  closes_at: string | null;
-  active: boolean;
-  consent: boolean;
-  notes: string | null;
-};
 
 function Setup({ missing }: { missing: string[] }) {
   return (
@@ -42,7 +31,7 @@ function Toggle({ id, field, value, on, off }: { id: string; field: string; valu
   );
 }
 
-export default async function Admin({ searchParams }: { searchParams: Promise<{ cat?: string }> }) {
+export default async function Admin({ searchParams }: { searchParams: Promise<{ cat?: string; q?: string }> }) {
   const missing = [
     !process.env.SUPABASE_URL && "SUPABASE_URL",
     !process.env.SUPABASE_SERVICE_ROLE_KEY && "SUPABASE_SERVICE_ROLE_KEY",
@@ -90,31 +79,49 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     );
   }
 
-  const { cat } = await searchParams;
-  let query = db().from("shops").select("*").order("area").order("name");
-  if (cat === "grocery" || cat === "hardware") query = query.eq("category", cat);
-  const { data, error } = await query;
-  const shops = (data ?? []) as ShopRow[];
-  const ready = shops.filter((s) => s.active && s.consent).length;
+  const { cat, q } = await searchParams;
+  const { data, error } = await db().from("shops").select("*").order("area").order("name");
+  const all = (data ?? []) as Shop[];
+  const ready = all.filter((s) => s.active && s.consent).length;
+  const needle = (q ?? "").trim().toLowerCase();
+  const digits = needle.replace(/\D/g, "");
+  const shops = all.filter(
+    (s) =>
+      (cat !== "grocery" && cat !== "hardware" ? true : s.category === cat) &&
+      (!needle ||
+        s.name.toLowerCase().includes(needle) ||
+        s.area.toLowerCase().includes(needle) ||
+        (s.address ?? "").toLowerCase().includes(needle) ||
+        (digits.length >= 3 && s.phone.includes(digits))),
+  );
+  const withLocation = all.filter((s) => s.lat != null).length;
+  const qs = (c: string) => {
+    const p = new URLSearchParams();
+    if (c) p.set("cat", c);
+    if (q) p.set("q", q);
+    const str = p.toString();
+    return str ? `/admin?${str}` : "/admin";
+  };
 
   return (
     <>
       {header}
-      {error && (
-        <p className="note error">
-          {explainDbError(error.message)}
-        </p>
-      )}
+      {error && <p className="note error">{explainDbError(error.message)}</p>}
 
       <div className="progress-card">
         <strong>
-          {shops.length} {shops.length === 1 ? "shop" : "shops"} · {ready} ready to call
+          {all.length} {all.length === 1 ? "shop" : "shops"} · {ready} ready to call · {withLocation} on the map
         </strong>
         <span className="muted small">“Ready” = active and the shop agreed to AI calls.</span>
       </div>
 
-      <AddShopForm />
+      <ShopForm />
       <BulkAddForm />
+
+      <form className="search" action="/admin">
+        {cat && <input type="hidden" name="cat" value={cat} />}
+        <input name="q" className="input" defaultValue={q} placeholder="Search name, area or phone" aria-label="Search shops" />
+      </form>
 
       <nav className="tabs">
         {[
@@ -122,14 +129,15 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
           ["grocery", "Grocery"],
           ["hardware", "Hardware"],
         ].map(([v, label]) => (
-          <a key={v} href={v ? `/admin?cat=${v}` : "/admin"} className={(cat ?? "") === v ? "on" : ""}>
+          <a key={v} href={qs(v)} className={(cat ?? "") === v ? "on" : ""}>
             {label}
           </a>
         ))}
       </nav>
 
       <ul className="shop-list">
-        {shops.length === 0 && <li className="muted">No shops yet. Add your first one above.</li>}
+        {all.length === 0 && <li className="muted">No shops yet. Add your first one above.</li>}
+        {all.length > 0 && shops.length === 0 && <li className="muted">No shops match.</li>}
         {shops.map((s) => (
           <li key={s.id} className={`card shop ${s.active ? "" : "inactive"}`}>
             <div className="row">
@@ -137,18 +145,31 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
               <span className="muted small">{s.category}</span>
             </div>
             <div className="small">
-              📍 {s.area} · 📞 <a href={`tel:${s.phone}`}>{formatNepalPhone(s.phone)}</a>
+              📍 {s.area}
+              {s.address && ` · ${s.address}`} · 📞 <a href={`tel:${s.phone}`}>{formatNepalPhone(s.phone)}</a>
               {s.closes_at && ` · closes ${s.closes_at}`}
+            </div>
+            <div className="small">
+              {s.lat != null && s.lng != null ? (
+                <a href={mapsLink(s.lat, s.lng)} target="_blank" rel="noreferrer">
+                  🗺 Open in Google Maps
+                </a>
+              ) : (
+                <span className="muted">No map location yet</span>
+              )}
             </div>
             {s.notes && <div className="muted small">{s.notes}</div>}
             <div className="shop-actions">
               <Toggle id={s.id} field="active" value={s.active} on="Active" off="Paused" />
               <Toggle id={s.id} field="consent" value={s.consent} on="Agreed to AI calls" off="No consent yet" />
-              <form action={deleteShopAction} className="push">
-                <input type="hidden" name="id" value={s.id} />
-                <button className="link small danger-text">Delete</button>
-              </form>
+              <div className="push">
+                <DeleteButton id={s.id} name={s.name} />
+              </div>
             </div>
+            <details className="edit">
+              <summary className="link small">✏️ Edit</summary>
+              <ShopForm shop={s} />
+            </details>
           </li>
         ))}
       </ul>

@@ -29,7 +29,8 @@ export function cleanSupabaseUrl(raw = "") {
   const dash = v.match(/supabase\.com\/dashboard\/project\/([a-z0-9]+)/i);
   if (dash) return `https://${dash[1]}.supabase.co`;
   let url = v.replace(/\s+/g, "");
-  if (url && !/^https?:\/\//i.test(url)) url = "https://" + url.replace(/^[a-z]+:\/*/i, "");
+  if (url && !/^https?:\/\//i.test(url))
+    url = (/^(localhost|127\.)/i.test(url) ? "http://" : "https://") + url.replace(/^[a-z]+:\/*/i, "");
   try {
     return new URL(url).origin;
   } catch {
@@ -69,7 +70,7 @@ export async function checkEnv({ network = true } = {}) {
   const url = cleanSupabaseUrl(rawUrl);
   if (!rawUrl) add(false, "SUPABASE_URL is empty", "Paste your Project URL after SUPABASE_URL= (Supabase → Project Settings → Data API).");
   else if (url.includes("your-project")) add(false, "SUPABASE_URL still has the example value", "Replace https://your-project.supabase.co with your real Project URL.");
-  else if (!/^https:\/\/[a-z0-9-]+\.supabase\.(co|in)$/i.test(url))
+  else if (!/^https:\/\/[a-z0-9-]+\.supabase\.(co|in)$/i.test(url) && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/i.test(url))
     add(false, `SUPABASE_URL doesn't look right: “${url}”`, "It must look exactly like https://abcdxyz.supabase.co — nothing after .co");
   else add(true, `SUPABASE_URL = ${url}`);
 

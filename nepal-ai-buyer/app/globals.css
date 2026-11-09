@@ -218,3 +218,9 @@ code { font-size: 13px; background: var(--bg); padding: 1px 4px; border-radius: 
 }
 .pill-on { background: var(--good-soft); color: var(--good); border-color: transparent; }
 .danger-text { color: var(--brand); }
+.loc-row { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-weight: 400; }
+.search { margin: 16px 0 0; }
+.edit { border-top: 1px solid var(--line); padding-top: 8px; }
+.edit summary { list-style: none; cursor: pointer; }
+.edit summary::-webkit-details-marker { display: none; }
+.edit[open] summary { margin-bottom: 8px; }
