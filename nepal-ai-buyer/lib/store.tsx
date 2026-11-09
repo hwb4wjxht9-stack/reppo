@@ -1,12 +1,15 @@
 "use client";
 
-// Keeps the prototype's state (the list, the mode, the chosen offer) while you
-// tap between screens. Saved in the browser so a refresh doesn't lose it.
+// Keeps the customer's place while they move between screens (the list, the
+// mode, the chosen offer). Saved in the browser so a refresh doesn't lose it.
+// The list itself is saved in the database when one is connected; `listId`
+// points to it.
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import { SAMPLE_LIST, type ListItem } from "./data";
 
 export type Mode = "automatic" | "supervised" | "manual";
+export type Category = "grocery" | "hardware";
 
 export type Order = {
   /** One entry per shop the list is split across. */
@@ -18,19 +21,22 @@ export type Order = {
 
 type State = {
   items: ListItem[];
+  category: Category;
+  listId: string | null;
   mode: Mode;
   order: Order | null;
 };
 
 type Store = State & {
   setItems: (items: ListItem[]) => void;
+  setList: (list: { items: ListItem[]; category: Category; listId: string | null }) => void;
   setMode: (mode: Mode) => void;
   setOrder: (order: Order | null) => void;
   reset: () => void;
 };
 
 const KEY = "nepal-ai-buyer-prototype";
-const initial: State = { items: SAMPLE_LIST, mode: "automatic", order: null };
+const initial: State = { items: SAMPLE_LIST, category: "grocery", listId: null, mode: "automatic", order: null };
 
 const Ctx = createContext<Store | null>(null);
 
@@ -53,6 +59,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   const store: Store = {
     ...state,
     setItems: (items) => setState((s) => ({ ...s, items, order: null })),
+    setList: ({ items, category, listId }) => setState((s) => ({ ...s, items, category, listId, order: null })),
     setMode: (mode) => setState((s) => ({ ...s, mode })),
     setOrder: (order) => setState((s) => ({ ...s, order })),
     reset: () => setState(initial),

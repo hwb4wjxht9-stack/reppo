@@ -1,76 +1,22 @@
 "use client";
 
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+// Used only when no database is connected: the list stays in this browser.
 import Header from "@/components/Header";
-import type { ListItem } from "@/lib/data";
+import ListEditor from "@/components/ListEditor";
 import { useStore } from "@/lib/store";
+import { useEffect, useState } from "react";
 
-function ConfirmList() {
-  const { items, setItems } = useStore();
-  const fromPhoto = useSearchParams().get("from") === "photo";
-
-  function update(id: string, patch: Partial<ListItem>) {
-    setItems(items.map((it) => (it.id === id ? { ...it, ...patch } : it)));
-  }
+export default function LocalList() {
+  const { items, category } = useStore();
+  // Wait one tick so the saved list is loaded from the browser first.
+  const [ready, setReady] = useState(false);
+  useEffect(() => setReady(true), []);
 
   return (
     <>
-      <Header title="Confirm your list" step={1} back="/" />
-      {fromPhoto && <p className="note">✨ AI read {items.length} items from your photo. Check them below.</p>}
-
-      <ul className="items">
-        {items.map((it) => (
-          <li key={it.id} className="item-row">
-            <input
-              className="item-name"
-              value={it.name}
-              aria-label="Item name"
-              onChange={(e) => update(it.id, { name: e.target.value })}
-            />
-            <div className="qty">
-              <button aria-label="Less" onClick={() => update(it.id, { quantity: Math.max(1, it.quantity - 1) })}>
-                −
-              </button>
-              <span>
-                {it.quantity} {it.unit}
-              </span>
-              <button aria-label="More" onClick={() => update(it.id, { quantity: it.quantity + 1 })}>
-                +
-              </button>
-            </div>
-            <button
-              className="remove"
-              aria-label={`Remove ${it.name}`}
-              onClick={() => setItems(items.filter((x) => x.id !== it.id))}
-            >
-              ✕
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      <button
-        className="btn secondary"
-        onClick={() => setItems([...items, { id: `n${Date.now()}`, name: "New item", quantity: 1, unit: "pcs" }])}
-      >
-        + Add item
-      </button>
-
-      <div className="footer">
-        <Link href="/mode" className={`btn primary big ${items.length === 0 ? "disabled" : ""}`}>
-          Looks right — find prices
-        </Link>
-      </div>
+      <Header title="Check your list" step={1} back="/" />
+      <p className="note small">Not connected to the database, so this list is only saved in this browser.</p>
+      {ready && <ListEditor initialItems={items} initialCategory={category} />}
     </>
-  );
-}
-
-export default function Page() {
-  return (
-    <Suspense>
-      <ConfirmList />
-    </Suspense>
   );
 }

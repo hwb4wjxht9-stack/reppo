@@ -224,3 +224,28 @@ code { font-size: 13px; background: var(--bg); padding: 1px 4px; border-radius: 
 .edit summary { list-style: none; cursor: pointer; }
 .edit summary::-webkit-details-marker { display: none; }
 .edit[open] summary { margin-bottom: 8px; }
+
+/* ---- Shopping list editor ---- */
+.list-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+.seg { display: flex; background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 3px; }
+.seg button { border: 0; background: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px; }
+.seg button.on { background: var(--brand); color: var(--brand-ink); }
+.save-status { font-size: 13px; color: var(--muted); }
+.save-status.saved { color: var(--good); }
+.save-status.error { color: var(--brand); font-weight: 600; }
+.item-row2 {
+  display: grid; grid-template-columns: 1fr auto; gap: 6px 8px; align-items: center;
+  background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 8px;
+}
+.item-row2.bad { border-color: var(--brand); }
+.qty2 { grid-column: 1 / -1; display: flex; align-items: center; gap: 4px; }
+.qty2 button {
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); cursor: pointer; flex: none;
+}
+.qty-input {
+  width: 64px; height: 36px; text-align: center; border: 1px solid var(--line); border-radius: 8px; background: var(--bg);
+}
+.unit { height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); padding: 0 8px; margin-left: 4px; }
+.row-problem { grid-column: 1 / -1; color: var(--brand); font-size: 13px; }
+.soon { flex-direction: row; align-items: center; justify-content: space-between; }
+.soon .btn:disabled { opacity: .55; cursor: not-allowed; }

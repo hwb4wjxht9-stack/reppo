@@ -98,6 +98,11 @@ create table if not exists order_parts (
   rating      int check (rating between 1 and 5)
 );
 
+-- Added in step 3: the list exactly as the customer typed it.
+alter table shopping_lists add column if not exists raw_text text;
+alter table shopping_lists add column if not exists updated_at timestamptz not null default now();
+
+create index if not exists list_items_list on list_items (list_id, position);
 create index if not exists shops_category_area on shops (category, area) where active;
 create index if not exists calls_list on calls (list_id);
 create index if not exists quotes_call on quotes (call_id);

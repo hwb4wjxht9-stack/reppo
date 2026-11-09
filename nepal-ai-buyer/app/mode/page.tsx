@@ -26,11 +26,11 @@ const MODES: { id: Mode; title: string; body: string; icon: string }[] = [
 ];
 
 export default function ChooseMode() {
-  const { mode, setMode, items } = useStore();
+  const { mode, setMode, items, listId } = useStore();
 
   return (
     <>
-      <Header title="How should we call?" step={2} back="/list" />
+      <Header title="How should we call?" step={2} back={listId ? `/list/${listId}` : "/list"} />
       <p className="muted">
         We'll call 4 nearby shops about your {items.length} items. Calls take about 10–20 minutes. You can leave the app
         while they run.
