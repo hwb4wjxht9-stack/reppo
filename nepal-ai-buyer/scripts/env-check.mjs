@@ -89,7 +89,8 @@ export async function checkEnv({ network = true } = {}) {
   if (!network || out.some((c) => !c.ok)) return out;
 
   const headers = { apikey: key };
-  if (!key.startsWith("sb_")) headers.Authorization = `Bearer ${key}`;
+  const viaProxy = (env.SUPABASE_KEY_FROM_PROXY ?? "").toLowerCase() === "true";
+  if (!key.startsWith("sb_") && !viaProxy) headers.Authorization = `Bearer ${key}`;
   try {
     const res = await fetch(`${url}/rest/v1/shops?select=id`, {
       headers: { ...headers, Prefer: "count=exact", Range: "0-0" },

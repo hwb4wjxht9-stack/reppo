@@ -53,9 +53,28 @@ export function supabaseSetupProblem(): string | null {
   return null;
 }
 
+/**
+ * Optional: SUPABASE_KEY_FROM_PROXY=true when a network proxy adds the real key
+ * to the `apikey` header (for example in a cloud test machine), so this app
+ * only holds a placeholder. Supabase then must not also get the placeholder
+ * in the Authorization header. Leave unset normally.
+ */
+function keyFromProxy(): boolean {
+  return clean(process.env.SUPABASE_KEY_FROM_PROXY).toLowerCase() === "true";
+}
+
+const withoutBearer: typeof fetch = (input, init) => {
+  const headers = new Headers(init?.headers);
+  headers.delete("Authorization");
+  return fetch(input, { ...init, headers });
+};
+
 export function db(): SupabaseClient {
   if (!supabaseConfigured()) throw new Error("Supabase is not set up. See README → Step 2.");
-  client ??= createClient(supabaseUrl(), serviceKey(), { auth: { persistSession: false } });
+  client ??= createClient(supabaseUrl(), serviceKey(), {
+    auth: { persistSession: false },
+    global: keyFromProxy() ? { fetch: withoutBearer } : undefined,
+  });
   return client;
 }
 
