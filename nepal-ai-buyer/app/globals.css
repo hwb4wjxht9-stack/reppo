@@ -192,3 +192,29 @@ textarea, .item-name {
 .plain { margin: 6px 0 0; padding-left: 18px; }
 .button-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
 .button-row .btn.primary { grid-column: 1 / -1; }
+
+/* ---- Admin ---- */
+.input, select.input {
+  width: 100%; border: 1px solid var(--line); border-radius: 10px; padding: 10px; background: var(--bg);
+}
+.form-grid label { display: flex; flex-direction: column; gap: 4px; font-size: 14px; font-weight: 600; }
+.form-grid label.check { flex-direction: row; align-items: center; gap: 8px; font-weight: 400; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.note.error { background: var(--brand-soft); color: var(--brand); }
+.note.ok { background: var(--good-soft); color: var(--good); }
+details summary { cursor: pointer; }
+details[open] summary { margin-bottom: 8px; }
+code { font-size: 13px; background: var(--bg); padding: 1px 4px; border-radius: 4px; }
+.tabs a { flex: 1; text-align: center; padding: 8px; border-radius: 9px; font-weight: 600; text-decoration: none; color: var(--ink); }
+.tabs a.on { background: var(--brand); color: var(--brand-ink); }
+.shop-list { list-style: none; padding: 0; margin: 0; }
+.shop.inactive { opacity: .55; }
+.shop a { color: var(--blue); }
+.shop-actions { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.shop-actions .push { margin-left: auto; }
+.pill {
+  border: 1px solid var(--line); background: var(--bg); border-radius: 999px;
+  padding: 4px 10px; font-size: 13px; cursor: pointer;
+}
+.pill-on { background: var(--good-soft); color: var(--good); border-color: transparent; }
+.danger-text { color: var(--brand); }

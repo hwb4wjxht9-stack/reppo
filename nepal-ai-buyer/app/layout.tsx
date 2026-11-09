@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { StoreProvider } from "@/lib/store";
+import Banner from "@/components/Banner";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -19,7 +20,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <StoreProvider>
           <main className="app">
-            <div className="banner">Prototype · all prices and shops are fake</div>
+            <Banner />
             {children}
           </main>
         </StoreProvider>
