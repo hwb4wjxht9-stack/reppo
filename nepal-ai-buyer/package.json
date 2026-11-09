@@ -3,9 +3,12 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.mjs",
+    "dev:plain": "next dev --port 3000",
+    "doctor": "node scripts/doctor.mjs",
     "build": "next build",
-    "start": "next start"
+    "start": "next start --port 3000",
+    "test": "node --test --experimental-strip-types tests/"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.119.0",

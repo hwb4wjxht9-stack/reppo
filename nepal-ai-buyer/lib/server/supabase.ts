@@ -22,8 +22,9 @@ export function supabaseUrl(): string {
   const raw = clean(process.env.SUPABASE_URL);
   const dash = raw.match(/supabase\.com\/dashboard\/project\/([a-z0-9]+)/i);
   if (dash) return `https://${dash[1]}.supabase.co`;
-  let url = raw;
-  if (url && !/^https?:\/\//i.test(url)) url = "https://" + url;
+  let url = raw.replace(/\s+/g, "");
+  // Missing or mistyped "https://" (e.g. "abcd.supabase.co", "htps:/abcd…").
+  if (url && !/^https?:\/\//i.test(url)) url = "https://" + url.replace(/^[a-z]+:\/*/i, "");
   try {
     return new URL(url).origin;
   } catch {
