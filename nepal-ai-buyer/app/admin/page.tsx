@@ -1,5 +1,5 @@
 import { adminPasswordSet, isAdmin } from "@/lib/server/admin-auth";
-import { db, supabaseConfigured } from "@/lib/server/supabase";
+import { db, explainDbError, supabaseConfigured, supabaseSetupProblem } from "@/lib/server/supabase";
 import { formatNepalPhone } from "@/lib/phone";
 import { deleteShopAction, logoutAction, toggleShopAction } from "./actions";
 import { AddShopForm, BulkAddForm, LoginForm } from "./forms";
@@ -67,6 +67,20 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
     );
   }
 
+  const problem = supabaseSetupProblem();
+  if (problem) {
+    return (
+      <>
+        {header}
+        <div className="card">
+          <strong>Check your .env.local file</strong>
+          <p className="note error">{problem}</p>
+          <p className="small">Fix it, save the file, then stop the app (Ctrl + C) and run npm run dev again.</p>
+        </div>
+      </>
+    );
+  }
+
   if (!(await isAdmin())) {
     return (
       <>
@@ -88,7 +102,7 @@ export default async function Admin({ searchParams }: { searchParams: Promise<{ 
       {header}
       {error && (
         <p className="note error">
-          Couldn't load shops: {error.message}. Did you run <code>supabase/schema.sql</code>?
+          {explainDbError(error.message)}
         </p>
       )}
 

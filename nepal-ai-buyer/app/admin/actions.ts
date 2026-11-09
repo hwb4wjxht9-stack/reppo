@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { isAdmin, logIn, logOut } from "@/lib/server/admin-auth";
-import { db } from "@/lib/server/supabase";
+import { db, explainDbError } from "@/lib/server/supabase";
 import { normalizeNepalPhone } from "@/lib/phone";
 
 export type FormState = { ok?: string; error?: string };
@@ -57,7 +57,7 @@ function parseShop(raw: Record<string, string | undefined>): ShopInput | string 
 
 function friendlyDbError(message: string, code?: string): string {
   if (code === "23505") return "A shop with that phone number already exists.";
-  return message;
+  return explainDbError(message);
 }
 
 export async function addShopAction(_: FormState, form: FormData): Promise<FormState> {
