@@ -101,7 +101,15 @@ async function call() {
   if (!phoneNumberId || !assistantId) stop("--from (Vapi phone number id) and --assistant are required. Run: node scripts/test-call.mjs check");
   if (!dbUrl || !dbKey) stop("SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are not set.");
 
-  // 1. Test data
+  // 1. ONE call, placed before any test data is written, so a refused call
+  //    leaves nothing behind. No retries, whatever happens.
+  const placed = await vapi("POST", "/call", {
+    name: "AI Buyer test call",
+    assistantId,
+    phoneNumberId,
+    customer: { number: to, name: "Test Shop" },
+  });
+  // 2. Test data (only once Vapi has accepted the call)
   const [shop] = await db("POST", "shops", {
     name: "Test Shop",
     phone: to,
@@ -115,13 +123,6 @@ async function call() {
   const [row] = await db("POST", "calls", { list_id: list.id, shop_id: shop.id, status: "queued" });
   console.log(`Test shop ${shop.id}, list ${list.id}, call row ${row.id} created.`);
 
-  // 2. ONE call. No retries, whatever happens.
-  const placed = await vapi("POST", "/call", {
-    name: "AI Buyer test call",
-    assistantId,
-    phoneNumberId,
-    customer: { number: to, name: "Test Shop" },
-  });
   console.log(`Call placed: ${placed.id}. Waiting for it to finish (max 2 minutes of talking)…`);
   await db("PATCH", `calls?id=eq.${row.id}`, { vapi_call_id: placed.id, status: "ringing" }, "return=minimal");
 
