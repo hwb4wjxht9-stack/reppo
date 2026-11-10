@@ -1,0 +1,36 @@
+{
+  "name": "AI Buyer test shopper (temporary)",
+  "firstMessage": "नमस्ते हजुर! म एउटा एआई सहायक हुँ, एक जना ग्राहकको तर्फबाट फोन गरेको। एक किलो चामलको भाउ कति हो?",
+  "firstMessageMode": "assistant-speaks-first",
+  "transcriber": { "provider": "azure", "language": "ne-NP" },
+  "voice": { "provider": "azure", "voiceId": "ne-NP-HemkalaNeural" },
+  "model": {
+    "provider": "openai",
+    "model": "gpt-4.1",
+    "temperature": 0.3,
+    "maxTokens": 120,
+    "messages": [
+      {
+        "role": "system",
+        "content": "You are a polite shopper phoning a shop in Kathmandu for a customer. You already said you are an AI assistant calling for a customer; if asked again, say yes. Speak ONLY natural, everyday Nepali. Keep every reply to one short sentence and say numbers as Nepali words.\n\nYour only task: find the price of 1 kg of rice (चामल).\n1. Wait for the shopkeeper to say a price.\n2. Then bargain politely exactly ONCE, for example: \"अलिकति मिलाउन मिल्दैन? अलि सस्तो गर्दिनुस् न।\"\n3. Accept whatever they answer. Never bargain a second time and never invent a price.\n4. Repeat the final price back once, say \"धन्यवाद, नमस्ते।\" and then use the endCall tool to hang up.\nIf they are busy, refuse, don't sell rice, or don't want to talk to an AI, thank them and end the call. Keep the whole call under 90 seconds."
+      }
+    ],
+    "tools": [{ "type": "endCall" }]
+  },
+  "maxDurationSeconds": 120,
+  "silenceTimeoutSeconds": 20,
+  "analysisPlan": {
+    "summaryPlan": { "enabled": true },
+    "structuredDataPlan": {
+      "enabled": true,
+      "schema": {
+        "type": "object",
+        "properties": {
+          "first_price_npr": { "type": "number", "description": "Price per kg of rice the shopkeeper first said, in Nepali rupees. Omit if never said." },
+          "final_price_npr": { "type": "number", "description": "Price per kg agreed after bargaining, in Nepali rupees. Same as first price if they did not lower it." },
+          "available": { "type": "boolean", "description": "Whether the shop has rice." }
+        }
+      }
+    }
+  }
+}
